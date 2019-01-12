@@ -165,7 +165,7 @@ def station_stats(df):
     most_common_end_station_index = df['End Station'].value_counts().idxmax()
     print (most_common_end_station_index, 'is the commonly used End Station')
     print ('\n')
-    
+
     # display most frequent combination of start station and end station trip
     df = df.groupby(['Start Station', 'End Station']).size().reset_index().rename(columns={0:'count'})
     #print(df['count'].head())
@@ -209,17 +209,23 @@ def user_stats(df):
     #print (df.groupby(['User Type']).size().reset_index().rename(columns={0:'count'}))
     if 'User Type' in df:
         mod_df = df.groupby(['User Type']).size().reset_index().rename(columns={0:'count'})
-        column_loc = mod_df.columns.get_loc("User Type")
-        print (mod_df.iloc[0, column_loc], "are", mod_df.iloc[0, column_loc+1], "in number")
-        print (mod_df.iloc[1, column_loc], "are", mod_df.iloc[1, column_loc+1], "in number")
+        #print (mod_df.head())
+        #column_loc = mod_df.columns.get_loc("User Type")
+        #print (mod_df.iloc[0, column_loc], "are", mod_df.iloc[0, column_loc+1], "in number")
+        #print (mod_df.iloc[1, column_loc], "are", mod_df.iloc[1, column_loc+1], "in number")
+
+        for index, row in mod_df.iterrows():
+            print(row['User Type'], "are", row['count'], "in number")
         print ('\n')
     
     # Display counts of gender
     if 'Gender' in df:
         mod_df = df.groupby(['Gender']).size().reset_index().rename(columns={0:'count'})
-        #print (mod_df)
-        print (mod_df.iloc[0, column_loc], "are", mod_df.iloc[0, column_loc+1], "in number")
-        print (mod_df.iloc[1, column_loc], "are", mod_df.iloc[1, column_loc+1], "in number")
+        #print (mod_df.head())
+        #print (mod_df.iloc[0, column_loc], "are", mod_df.iloc[0, column_loc+1], "in number")
+        #print (mod_df.iloc[1, column_loc], "are", mod_df.iloc[1, column_loc+1], "in number")
+        for index, row in mod_df.iterrows():
+            print(row['Gender'], "are", row['count'], "in number")
         print ('\n')
 
     # Display earliest, most recent, and most common year of birth
