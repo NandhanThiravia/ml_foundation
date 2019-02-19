@@ -1,0 +1,266 @@
+1) Basic
+SELECT occurred_at, account_id, channel
+FROM web_events
+
+2) LIMIT
+SELECT occurred_at, account_id, channel
+FROM web_events
+LIMIT 20
+
+3) Write a query to return the 10 earliest orders in the orders table. Include the id, occurred_at, and total_amt_usd.
+SELECT id, occurred_at, total_amt_usd
+FROM orders
+ORDER BY occurred_at DESC
+LIMIT 10
+
+4) Write a query to return the top 5 orders in terms of largest total_amt_usd. Include the id, account_id, and total_amt_usd.
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY total_amt_usd DESC
+LIMIT 5
+
+5) Write a query to return the lowest 20 orders in terms of smallest total_amt_usd. Include the id, account_id, and total_amt_usd.
+SELECT id, account_id, total_amt_usd
+FROM orders
+ORDER BY total_amt_usd
+LIMIT 20
+
+6) Write a query that displays the order ID, account ID, and total dollar amount for all the orders, sorted first by the account ID (in ascending order), and then by the total dollar amount (in descending order). 
+SELECT id, account_id, total
+FROM orders
+ORDER BY account_id ASC, total DESC
+
+7) Now write a query that again displays order ID, account ID, and total dollar amount for each order, but this time sorted first by total dollar amount (in descending order), and then by account ID (in ascending order). 
+SELECT id, account_id, total
+FROM orders
+ORDER BY total DESC, account_id ASC
+
+8) Pulls the first 5 rows and all columns from the orders table that have a dollar amount of gloss_amt_usd greater than or equal to 1000.
+SELECT *
+FROM orders
+WHERE gloss_amt_usd >= 1000
+ORDER BY gloss_amt_usd DESC
+LIMIT 5
+
+9) Pulls the first 10 rows and all columns from the orders table that have a total_amt_usd less than 500.
+SELECT *
+FROM orders
+WHERE gloss_amt_usd < 500
+ORDER BY gloss_amt_usd DESC
+LIMIT 10
+
+10) Filter the accounts table to include the company name, website, and the primary point of contact (primary_poc) just for the Exxon Mobil company in the accounts table.
+SELECT name, website, primary_poc
+FROM accounts
+WHERE name = 'Exxon Mobil'
+
+11) Create a column that divides the standard_amt_usd by the standard_qty to find the unit price for standard paper for each order. Limit the results to the first 10 orders, and include the id and account_id fields. 
+SELECT id, account_id, (standard_amt_usd / standard_qty) AS unit_price
+FROM orders
+LIMIT 10
+
+12) Write a query that finds the percentage of revenue that comes from poster paper for each order. You will need to use only the columns that end with _usd. (Try to do this without using the total column.) Display the id and account_id fields also. 
+
+NOTE - you will receive an error with the correct solution to this question. This occurs because at least one of the values in the data creates a division by zero in your formula. You will learn later in the course how to fully handle this issue. For now, you can just limit your calculations to the first 10 orders, as we did in question #1, and you'll avoid that set of data that causes the problem.
+SELECT id, account_id, ((poster_amt_usd / total_amt_usd) * 100) AS poster_percent
+FROM orders
+LIMIT 10
+
+13) All the companies whose names start with 'C'. 
+SELECT name
+FROM accounts
+WHERE name LIKE 'C%'
+
+14) All companies whose names contain the string 'one' somewhere in the name.
+SELECT name
+FROM accounts
+WHERE name LIKE '%one%'
+
+15) All companies whose names end with 's'.
+SELECT name
+FROM accounts
+WHERE name LIKE '%s'
+
+16) Use the accounts table to find the account name, primary_poc, and sales_rep_id for Walmart, Target, and Nordstrom.
+SELECT name, primary_poc, sales_rep_id
+FROM accounts
+WHERE name IN ('Walmart', 'Target', 'Nordstrom')
+
+17) Use the web_events table to find all information regarding individuals who were contacted via the channel of organic or adwords.
+SELECT *
+FROM web_events
+WHERE channel IN ('organic', 'adwords')
+
+18) Use the accounts table to find the account name, primary poc, and sales rep id for all stores except Walmart, Target, and Nordstrom.
+SELECT name, primary_poc, sales_rep_id
+FROM accounts
+WHERE name NOT IN ('Walmart', 'Target', 'Nordstrom')
+
+19) Use the web_events table to find all information regarding individuals who were contacted via any method except using organic or adwords methods.
+SELECT *
+FROM web_events
+WHERE channel NOT IN ('organic', 'adwords')
+
+20) All the companies whose names do not start with 'C'.
+SELECT name
+FROM accounts
+WHERE name NOT LIKE 'C%'
+
+21) All companies whose names do not contain the string 'one' somewhere in the name.
+SELECT name
+FROM accounts
+WHERE name NOT LIKE '%one%'
+
+22) All companies whose names do not end with 's'.
+SELECT name
+FROM accounts
+WHERE name NOT LIKE '%s'
+
+23) Write a query that returns all the orders where the standard_qty is over 1000, the poster_qty is 0, and the gloss_qty is 0.
+SELECT *
+FROM orders
+WHERE standard_qty > 1000 AND poster_qty = 0 AND gloss_qty = 0
+
+24) Using the accounts table, find all the companies whose names do not start with 'C' and end with 's'.
+SELECT *
+FROM accounts
+WHERE name NOT LIKE 'C%' AND name LIKE '%s'
+
+25) When you use the BETWEEN operator in SQL, do the results include the values of your endpoints, or not? Figure out the answer to this important question by writing a query that displays the order date and gloss_qty data for all orders where gloss_qty is between 24 and 29. Then look at your output to see if the BETWEEN operator included the begin and end values or not.
+SELECT *
+FROM orders
+WHERE gloss_qty BETWEEN 24 AND 29
+
+26) Use the web_events table to find all information regarding individuals who were contacted via the organic or adwords channels, and started their account at any point in 2016, sorted from newest to oldest.
+SELECT *
+FROM web_events
+WHERE channel = 'organic' OR channel = 'adwords' AND occurred_at BETWEEN '2016-01-01' AND '2017-01-01'
+
+27) Find list of orders ids where either gloss_qty or poster_qty is greater than 4000. Only include the id field in the resulting table.
+SELECT id
+FROM orders
+WHERE gloss_qty > 4000 OR poster_qty > 4000
+
+28) Write a query that returns a list of orders where the standard_qty is zero and either the gloss_qty or poster_qty is over 1000.
+SELECT *
+FROM orders
+WHERE standard_qty = 0 AND (poster_qty > 1000 OR gloss_qty > 1000)
+
+29) Find all the company names that start with a 'C' or 'W', and the primary contact contains 'ana' or 'Ana', but it doesn't contain 'eana'.
+SELECT *
+FROM accounts
+where (name LIKE 'C%' OR name LIKE 'W%') AND ((primary_poc LIKE '%ana%' or primary_poc LIKE '%Ana%') AND primary_poc NOT LIKE '%eana%')
+
+--------------
+     JOIN
+--------------
+1) Provide a table for all web_events associated with account name of Walmart. There should be three columns. Be sure to include the primary_poc, time of the event, and the channel for each event. Additionally, you might choose to add a fourth column to assure only Walmart events were chosen. 
+SELECT web_events.*, accounts.*
+FROM web_events
+JOIN accounts
+	ON web_events.account_id = accounts.id
+WHERE accounts.name = 'Walmart'
+
+2) Provide a table that provides the region for each sales_rep along with their associated accounts. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to account name. 
+SELECT sales_reps.name sales_rep_name, region.name region_name, accounts.name accounts_name
+FROM sales_reps
+JOIN region
+	ON sales_reps.region_id = region.id
+JOIN accounts
+	ON accounts.sales_rep_id = sales_reps.id
+ORDER BY accounts.name;
+
+3) Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. Your final table should have 3 columns: region name, account name, and unit price. A few accounts have 0 for total, so I divided by (total + 0.01) to assure not dividing by zero.
+SELECT region.name region_name, accounts.name account_name, (orders.total_amt_usd / (orders.total + 0.00001)) unit_price
+FROM orders
+JOIN accounts
+	ON orders.account_id = accounts.id
+JOIN sales_reps
+	ON accounts.sales_rep_id = sales_reps.id
+JOIN region
+	ON region.id = sales_reps.region_id
+	
+4) Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to account name.
+SELECT sales_reps.name sales_rep_name, region.name region_name, accounts.name account_name
+FROM sales_reps
+LEFT JOIN region
+	ON sales_reps.region_id = region.id AND
+    	region.name = 'Midwest'
+LEFT JOIN accounts
+	ON sales_reps.id = accounts.sales_rep_id
+ORDER BY accounts.name
+
+5) Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for accounts where the sales rep has a first name starting with S and in the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to account name. 
+SELECT sales_reps.name sales_rep_name, region.name region_name, accounts.name account_name
+FROM sales_reps
+LEFT JOIN region
+	ON sales_reps.region_id = region.id AND
+    	region.name = 'Midwest' AND
+        sales_reps.name LIKE 'S%'
+LEFT JOIN accounts
+	ON sales_reps.id = accounts.sales_rep_id
+ORDER BY accounts.name
+
+6) Provide a table that provides the region for each sales_rep along with their associated accounts. This time only for accounts where the sales rep has a last name starting with K and in the Midwest region. Your final table should include three columns: the region name, the sales rep name, and the account name. Sort the accounts alphabetically (A-Z) according to account name.
+SELECT sales_reps.name sales_rep_name, region.name region_name, accounts.name account_name
+FROM sales_reps
+LEFT JOIN region
+	ON sales_reps.region_id = region.id AND
+    	region.name = 'Midwest' AND
+        sales_reps.name LIKE '% K%'
+LEFT JOIN accounts
+	ON sales_reps.id = accounts.sales_rep_id
+ORDER BY accounts.name
+
+7) Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. However, you should only provide the results if the standard order quantity exceeds 100. Your final table should have 3 columns: region name, account name, and unit price. In order to avoid a division by zero error, adding .01 to the denominator here is helpful total_amt_usd/(total+0.01). 
+SELECT orders.id, accounts.name account_name, region.name region_name, (total_amt_usd / (total+0.001)) unit_price
+FROM orders
+LEFT JOIN accounts
+	on orders.account_id = accounts.id AND
+    	standard_amt_usd > 100
+LEFT JOIN sales_reps
+	ON accounts.sales_rep_id = sales_reps.id
+LEFT JOIN region
+	ON sales_reps.region_id = region.id
+
+8) Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. However, you should only provide the results if the standard order quantity exceeds 100 and the poster order quantity exceeds 50. Your final table should have 3 columns: region name, account name, and unit price. Sort for the smallest unit price first. In order to avoid a division by zero error, adding .01 to the denominator here is helpful (total_amt_usd/(total+0.01). 
+SELECT orders.id, accounts.name account_name, region.name region_name, (total_amt_usd / (total+0.001)) unit_price
+FROM orders
+LEFT JOIN accounts
+	on orders.account_id = accounts.id AND
+    	standard_amt_usd > 100 AND
+        poster_amt_usd > 50
+LEFT JOIN sales_reps
+	ON accounts.sales_rep_id = sales_reps.id
+LEFT JOIN region
+	ON sales_reps.region_id = region.id
+ORDER BY unit_price
+
+9) Provide the name for each region for every order, as well as the account name and the unit price they paid (total_amt_usd/total) for the order. However, you should only provide the results if the standard order quantity exceeds 100 and the poster order quantity exceeds 50. Your final table should have 3 columns: region name, account name, and unit price. Sort for the largest unit price first. In order to avoid a division by zero error, adding .01 to the denominator here is helpful (total_amt_usd/(total+0.01). 
+SELECT orders.id, accounts.name account_name, region.name region_name, (total_amt_usd / (total+0.001)) unit_price
+FROM orders
+LEFT JOIN accounts
+	on orders.account_id = accounts.id AND
+    	standard_amt_usd > 100 AND
+        poster_amt_usd > 50
+LEFT JOIN sales_reps
+	ON accounts.sales_rep_id = sales_reps.id
+LEFT JOIN region
+	ON sales_reps.region_id = region.id
+ORDER BY unit_price DESC
+
+10) What are the different channels used by account id 1001? Your final table should have only 2 columns: account name and the different channels. You can try SELECT DISTINCT to narrow down the results to only the unique values.
+SELECT DISTINCT accounts.name, web_events.channel
+FROM accounts
+JOIN web_events
+	ON web_events.account_id = accounts.id AND
+    	accounts.id = 1001
+
+11) Find all the orders that occurred in 2015. Your final table should have 4 columns: occurred_at, account name, order total, and order total_amt_usd.
+SELECT DISTINCT orders.occurred_at, accounts.name, orders.total, orders.total_amt_usd
+FROM orders
+JOIN accounts
+	ON orders.account_id = accounts.id
+WHERE orders.occurred_at >= '2015-01-01' AND
+	orders.occurred_at <= '2015-12-31'
+ORDER BY orders.occurred_at DESC;
