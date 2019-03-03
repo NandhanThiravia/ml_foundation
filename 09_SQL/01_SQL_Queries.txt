@@ -784,3 +784,131 @@ FROM (SELECT name, CASE WHEN LEFT(UPPER(name), 1) IN ('A','E','I','O','U')
           CASE WHEN LEFT(UPPER(name), 1) IN ('A','E','I','O','U') 
                        THEN 0 ELSE 1 END AS other
          FROM accounts) t1;
+
+-----------------------------
+	LEFT / RIGHT / POSITION
+-----------------------------
+1) Use the accounts table to create first and last name columns that hold the first and last names for the primary_poc. 
+SELECT primary_poc, 
+	POSITION(' ' IN primary_poc) AS position,
+	LEFT(primary_poc, POSITION(' ' IN primary_poc)-1) AS first_name, 
+    RIGHT(primary_poc, LENGTH(primary_poc) - POSITION(' ' IN primary_poc)) AS last_name
+FROM accounts
+
+2) Now see if you can do the same thing for every rep name in the sales_reps table. Again provide first and last name columns.
+SELECT LEFT(name, STRPOS(name, ' ') -1 ) first_name, 
+       RIGHT(name, LENGTH(name) - STRPOS(name, ' ')) last_name
+FROM sales_reps;
+
+--------------------------
+		CONCAT
+--------------------------
+1) Each company in the accounts table wants to create an email address for each primary_poc. The email address should be the first name of the primary_poc . last name primary_poc @ company name .com.
+WITH t1 AS (
+ SELECT LEFT(primary_poc,
+			STRPOS(primary_poc, ' ') -1 ) first_name,  
+			RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' ')) last_name, 
+			name
+ FROM accounts)
+SELECT first_name, last_name, CONCAT(first_name, '.', last_name, '@', name, '.com')
+FROM t1;
+
+2) You may have noticed that in the previous solution some of the company names include spaces, which will certainly not work in an email address. See if you can create an email address that will work by removing all of the spaces in the account name, but otherwise your solution should be just as in question 1. Some helpful documentation is here.
+WITH t1 AS (
+ SELECT LEFT(primary_poc,
+			STRPOS(primary_poc, ' ') -1 ) first_name,
+			RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' ')) last_name,
+			name
+ FROM accounts)
+SELECT first_name, last_name, CONCAT(first_name, '.', last_name, '@', REPLACE(name, ' ', ''), '.com')
+FROM  t1;
+
+3) We would also like to create an initial password, which they will change after their first log in. The first password will be the first letter of the primary_poc's first name (lowercase), then the last letter of their first name (lowercase), the first letter of their last name (lowercase), the last letter of their last name (lowercase), the number of letters in their first name, the number of letters in their last name, and then the name of the company they are working with, all capitalized with no spaces.
+WITH t1 AS (
+ SELECT LEFT(primary_poc,
+			STRPOS(primary_poc, ' ') -1 ) first_name,
+			RIGHT(primary_poc, LENGTH(primary_poc) - STRPOS(primary_poc, ' ')) last_name,
+			name
+FROM accounts)
+SELECT first_name,
+		last_name, 
+		CONCAT(first_name, '.', last_name, '@', name, '.com'), 
+		LEFT(LOWER(first_name), 1) || RIGHT(LOWER(first_name), 1) || LEFT(LOWER(last_name), 1) || RIGHT(LOWER(last_name), 1) || LENGTH(first_name) || LENGTH(last_name) || REPLACE(UPPER(name), ' ', '')
+FROM t1;
+
+--------------------------
+		WINDOW
+--------------------------
+1) Using Derek's previous video as an example, create another running total. This time, create a running total of standard_amt_usd (in the orders table) over order time with no date truncation. Your final table should have two columns: one with the amount being added for each new row, and a second with the running total.
+SELECT occurred_at,
+		standard_amt_usd,
+		SUM(standard_amt_usd) over (ORDER BY occurred_at)
+FROM orders
+
+2) Now, modify your query from the previous quiz to include partitions. Still create a running total of standard_amt_usd (in the orders table) over order time, but this time, date truncate occurred_at by year and partition by that same year-truncated occurred_at variable. Your final table should have three columns: One with the amount being added for each row, one for the truncated date, and a final column with the running total within each year.
+SELECT DATE_TRUNC('year', occurred_at),
+		standard_amt_usd,
+		SUM(standard_amt_usd) over (PARTITION BY DATE_TRUNC('year', occurred_at) ORDER BY occurred_at) AS running_year_total
+FROM orders
+
+3) Select the id, account_id, and total variable from the orders table, then create a column called total_rank that ranks this total amount of paper ordered (from highest to lowest) for each account using a partition. Your final table should have these four columns
+SELECT id, 
+		account_id, 
+        total,
+        DENSE_RANK() OVER (PARTITION BY account_id ORDER BY total DESC)
+FROM orders
+LIMIT 50
+
+4) Derek's play code
+SELECT id,
+       account_id,
+       standard_qty,
+       DATE_TRUNC('month', occurred_at) AS month,
+       DENSE_RANK() OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS dense_rank,
+       SUM(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS sum_std_qty,
+       COUNT(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS count_std_qty,
+       AVG(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS avg_std_qty,
+       MIN(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS min_std_qty,
+       MAX(standard_qty) OVER (PARTITION BY account_id ORDER BY DATE_TRUNC('month',occurred_at)) AS max_std_qty
+FROM orders
+
+5) Remove DATE_TRUNC part
+SELECT id,
+       account_id,
+       standard_qty,
+       DENSE_RANK() OVER (PARTITION BY account_id) AS dense_rank,
+       SUM(standard_qty) OVER (PARTITION BY account_id) AS sum_std_qty,
+       COUNT(standard_qty) OVER (PARTITION BY account_id) AS count_std_qty,
+       AVG(standard_qty) OVER (PARTITION BY account_id) AS avg_std_qty,
+       MIN(standard_qty) OVER (PARTITION BY account_id) AS min_std_qty,
+       MAX(standard_qty) OVER (PARTITION BY account_id) AS max_std_qty
+FROM orders
+
+6) WINDOW Alias
+SELECT id,
+       account_id,
+       DATE_TRUNC('year',occurred_at) AS year,
+       DENSE_RANK() OVER my_window AS dense_rank,
+       total_amt_usd,
+       SUM(total_amt_usd) OVER my_window AS sum_total_amt_usd,
+       COUNT(total_amt_usd) OVER my_window AS count_total_amt_usd,
+       AVG(total_amt_usd) OVER my_window AS avg_total_amt_usd,
+       MIN(total_amt_usd) OVER my_window AS min_total_amt_usd,
+       MAX(total_amt_usd) OVER my_window AS max_total_amt_usd
+FROM orders
+WINDOW my_window AS (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at))
+
+7) Use the NTILE functionality to divide the accounts into 4 levels in terms of the amount of standard_qty for their orders. Your resulting table should have the account_id, the occurred_at time for each order, the total amount of standard_qty paper purchased, and one of four levels in a standard_quartile column.
+SELECT account_id, occurred_at, standard_qty,
+		NTILE(4) OVER (ORDER BY standard_qty) AS quartile
+FROM orders
+
+8) Use the NTILE functionality to divide the accounts into two levels in terms of the amount of gloss_qty for their orders. Your resulting table should have the account_id, the occurred_at time for each order, the total amount of gloss_qty paper purchased, and one of two levels in a gloss_half column.
+SELECT account_id, occurred_at, gloss_qty,
+		NTILE(2) OVER (ORDER BY gloss_qty) AS quartile
+FROM orders
+
+9) Use the NTILE functionality to divide the orders for each account into 100 levels in terms of the amount of total_amt_usd for their orders. Your resulting table should have the account_id, the occurred_at time for each order, the total amount of total_amt_usd paper purchased, and one of 100 levels in a total_percentile column.
+SELECT account_id, occurred_at, total_amt_usd,
+		NTILE(100) OVER (ORDER BY total_amt_usd) AS quartile
+FROM orders
